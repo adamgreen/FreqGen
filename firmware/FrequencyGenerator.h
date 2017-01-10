@@ -39,9 +39,14 @@ protected:
     enum { SAMPLE_COUNT = 1000 };
 
     void generateSineWave();
+    void refresh();
 
     uint32_t* m_pSamples;
     uint32_t  m_sineWave[SAMPLE_COUNT];
+    uint32_t  m_currSampleCount;
+    uint32_t  m_currAmplitude;
+    uint32_t  m_frequency;
+    uint32_t  m_amplitude;
     bool      m_isRunning;
 };
 

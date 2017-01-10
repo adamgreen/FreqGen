@@ -17,6 +17,12 @@
 #include "FrequencyGenerator.h"
 
 
+#define AMPLITUDE_MIN 0
+#define AMPLITUDE_MAX 100
+#define FREQUENCY_MAX 100000
+#define FREQUENCY_MIN 1
+
+
 static Serial            g_serial(USBTX, USBRX);
 static volatile uint32_t g_frequency = 1000;
 static volatile uint32_t g_amplitude = 50;
@@ -87,8 +93,10 @@ static void serialRxHandler(void)
         }
         else if (curr == '\n')
         {
-            if (frequency > 1000)
-                frequency = 1000;
+            if (frequency > FREQUENCY_MAX)
+                frequency = FREQUENCY_MAX;
+            if (frequency < FREQUENCY_MIN)
+                frequency = FREQUENCY_MIN;
 
             g_serial.putc('\r');
             g_serial.putc('\n');
@@ -97,23 +105,23 @@ static void serialRxHandler(void)
             g_frequency = frequency;
             frequency = 0;
         }
-        else if (lower == 'a' && g_frequency > 0)
+        else if (lower == 'a' && g_frequency > FREQUENCY_MIN)
         {
             g_frequency--;
             frequency = 0;
 
         }
-        else if (lower == 'd' && g_frequency < 1000)
+        else if (lower == 'd' && g_frequency < FREQUENCY_MAX)
         {
             g_frequency++;
             frequency = 0;
         }
-        else if ((curr == '+' || lower == 'w') && g_amplitude < 100)
+        else if ((curr == '+' || lower == 'w') && g_amplitude < AMPLITUDE_MAX)
         {
             g_amplitude++;
             frequency = 0;
         }
-        else if ((curr == '-' || lower == 's') && g_amplitude > 0)
+        else if ((curr == '-' || lower == 's') && g_amplitude > AMPLITUDE_MIN)
         {
             g_amplitude--;
             frequency = 0;

@@ -38,9 +38,7 @@ int main()
     g_serial.baud(230400);
     g_serial.attach(serialRxHandler);
 
-    freqGen.setAmplitude(g_amplitude);
     freqGen.start();
-
     ledTimer.start();
     while(1)
     {
@@ -78,6 +76,7 @@ static void serialRxHandler(void)
     while (g_serial.readable())
     {
         char curr = g_serial.getc();
+        char lower = tolower(curr);
 
         if (isdigit(curr))
         {
@@ -98,19 +97,26 @@ static void serialRxHandler(void)
             g_frequency = frequency;
             frequency = 0;
         }
-        else if (curr == '+')
+        else if (lower == 'a' && g_frequency > 0)
         {
-            if (g_amplitude < 100)
-            {
-                g_amplitude++;
-            }
+            g_frequency--;
+            frequency = 0;
+
         }
-        else if (curr == '-')
+        else if (lower == 'd' && g_frequency < 1000)
         {
-            if (g_amplitude > 0)
-            {
-                g_amplitude--;
-            }
+            g_frequency++;
+            frequency = 0;
+        }
+        else if ((curr == '+' || lower == 'w') && g_amplitude < 100)
+        {
+            g_amplitude++;
+            frequency = 0;
+        }
+        else if ((curr == '-' || lower == 's') && g_amplitude > 0)
+        {
+            g_amplitude--;
+            frequency = 0;
         }
     }
 }

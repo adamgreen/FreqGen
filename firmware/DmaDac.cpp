@@ -33,9 +33,6 @@ DmaDac::DmaDac(PinName pin) : AnalogOut(pin)
     m_channelTx = allocateDmaChannel(GPDMA_CHANNEL_LOW);
     m_pChannelTx = dmaChannelFromIndex(m_channelTx);
 
-    // DAC runs at 1/4 the CPU core clock.
-    m_dacTicksPerMicrosecond = (SystemCoreClock / 4) / 1000000;
-
     m_isLooping = false;
 
     // Default to a sample frequency of 100kHz (10 microseconds/sample);
@@ -48,9 +45,11 @@ DmaDac::~DmaDac()
     freeDmaChannel(m_channelTx);
 }
 
-void DmaDac::setSampleTime(uint32_t sampleTimeInMicroSeconds)
+void DmaDac::setSampleTime(uint32_t sampleTimeInNanoSeconds)
 {
-    m_dacTicksPerSample = m_dacTicksPerMicrosecond * sampleTimeInMicroSeconds - 1;
+    // Note: DAC runs at 1/4 the CPU core clock.
+    uint32_t dacTicksPerSample = (uint32_t)(((uint64_t)sampleTimeInNanoSeconds * (uint64_t)SystemCoreClock) / (uint64_t)4000000000) - 1;
+    LPC_DAC->DACCNTVAL = dacTicksPerSample;
 }
 
 void DmaDac::start(uint32_t* pSamples, size_t sampleLength, bool loopSamples)
@@ -91,9 +90,6 @@ void DmaDac::start(uint32_t* pSamples, size_t sampleLength, bool loopSamples)
                    (DMA_PERIPHERAL_DAC << DMACCxCONFIG_DEST_PERIPHERAL_SHIFT) |
                    DMACCxCONFIG_TRANSFER_TYPE_M2P;
 
-    // Set the sample rate.
-    LPC_DAC->DACCNTVAL = m_dacTicksPerSample;
-
     // Turn on DMA transmit requests in DAC.
     static const uint32_t CNT_ENA = (1 << 2);
     static const uint32_t DMA_ENA = (1 << 3);
@@ -130,9 +126,6 @@ void DmaDac::haltDma()
 
 bool DmaDac::isTransferring()
 {
-    if (m_isLooping)
-        return true;
-
     uint32_t isStillActive = m_pChannelTx->DMACCConfig & DMACCxCONFIG_ACTIVE;
     if (isStillActive)
         return true;

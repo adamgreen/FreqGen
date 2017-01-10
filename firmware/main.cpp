@@ -13,29 +13,22 @@
    limitations under the License.
 */
 #include <mbed.h>
-#include "DmaDac.h"
-
-
-#define ONE_MICROSECOND 1
-#define SAMPLE_COUNT    1000
+#include "FrequencyGenerator.h"
 
 // Function Prototypes.
 
+//#define FREQUENCY
 
 int main()
 {
-    static   DigitalOut myled(LED1);
-    static   Timer      ledTimer;
-    static   DmaDac     dac(p18);
-    uint32_t*           pSamples;
+    static   DigitalOut         myled(LED1);
+    static   Timer              ledTimer;
+    static   FrequencyGenerator freqGen(p18);
+    uint32_t amplitude = 100;
+    uint32_t frequency = 1000;
+    bool     isDecreasing = true;
 
-    pSamples = (uint32_t*)dmaHeap0Alloc(sizeof(*pSamples) * SAMPLE_COUNT);
-    for (size_t i = 0 ; i < SAMPLE_COUNT ; i++)
-    {
-        pSamples[i] = 32767.5f + 32767.5f * sinf((float)i * (2.0f * M_PI / SAMPLE_COUNT));
-    }
-    dac.setSampleTime(ONE_MICROSECOND);
-    dac.start(pSamples, SAMPLE_COUNT, true);
+    freqGen.start();
 
     ledTimer.start();
     while(1)
@@ -44,6 +37,44 @@ int main()
         {
             myled = !myled;
             ledTimer.reset();
+
+            if (isDecreasing)
+            {
+#ifdef FREQUENCY
+                frequency-=50;
+                if (frequency == 50)
+                {
+                    isDecreasing = false;
+                }
+#else
+                amplitude--;
+                if (amplitude == 0)
+                {
+                    isDecreasing = false;
+                }
+#endif
+            }
+            else
+            {
+#ifdef FREQUENCY
+                frequency+=50;
+                if (frequency == 1000)
+                {
+                    isDecreasing = true;
+                }
+#else
+                amplitude++;
+                if (amplitude == 100)
+                {
+                    isDecreasing = true;
+                }
+#endif
+            }
+#ifdef FREQUENCY
+            freqGen.setFrequency(frequency);
+#else
+            freqGen.setAmplitude(amplitude);
+#endif
         }
     }
 }

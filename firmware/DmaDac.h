@@ -27,7 +27,7 @@ public:
 
     void stop();
     void start(uint32_t* pSamples, size_t sampleLength, bool loopSamples);
-    void setSampleTime(uint32_t sampleTimeInMicroSeconds);
+    void setSampleTime(uint32_t sampleTimeInNanoSeconds);
     bool isTransferring();
 
 protected:
@@ -37,8 +37,6 @@ protected:
     LPC_GPDMACH_TypeDef*        m_pChannelTx;
     DmaLinkedListItem           m_dmaListItem;
     uint32_t                    m_channelTx;
-    uint32_t                    m_dacTicksPerMicrosecond;
-    uint32_t                    m_dacTicksPerSample;
     bool                        m_isLooping;
 };
 

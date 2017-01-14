@@ -1,0 +1,22 @@
+==Overview
+{{https://github.com/adamgreen/FreqGen/blob/master/image.jpg?raw=true}}\\
+A quick hack to generate simple audio waveforms using the DAC on a
+[[https://developer.mbed.org/platforms/mbed-LPC1768/ | mbed-LPC1768]]. It can generate sine waves with frequencies from
+1 to 100kHz. The user interface for this waveform generator is via the USB to UART interface on the mbed device.
+Keypresses can vary the frequency (1 Hz - 100 kHz) and amplitude (0 to 100%) of the generated sine waves.
+| + | Volume Up |
+| - | Volume Down |
+| W | Volume Up |
+| S | Volume Down |
+| A | Frequency Down |
+| D | Frequency Up |
+It is also possible to select a specific frequency by inputing the desired frequency value and then pressing return. The
+waveform is generated on **pin p18** of the mbed.
+
+
+==How to Clone
+This project uses submodules (ie. GCC4MBED).  Cloning therefore requires an extra flag to get all of the necessary code.
+
+{{{
+git clone --recursive git@github.com:adamgreen/FreqGen.git
+}}}
